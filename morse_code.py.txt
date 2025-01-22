@@ -1,0 +1,117 @@
+# Write the Streamlit app code to a file
+app_code = """
+import streamlit as st
+
+# Morse Code Dictionary
+MORSE_CODE_DICT = {
+    'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.',
+    'G': '--.', 'H': '....', 'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..',
+    'M': '--', 'N': '-.', 'O': '---', 'P': '.--.', 'Q': '--.-', 'R': '.-.',
+    'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+    'Y': '-.--', 'Z': '--..', '1': '.----', '2': '..---', '3': '...--',
+    '4': '....-', '5': '.....', '6': '-....', '7': '--...', '8': '---..',
+    '9': '----.', '0': '-----', ',': '--..--', '.': '.-.-.-', '?': '..--..',
+    '/': '-..-.', '-': '-....-', '(': '-.--.', ')': '-.--.-', ' ': '/'
+}
+
+# Reverse the Morse code dictionary
+MORSE_CODE_REVERSE_DICT = {v: k for k, v in MORSE_CODE_DICT.items()}
+
+def text_to_morse(text:str)->str:
+    return ' '.join(MORSE_CODE_DICT.get(char.upper(), '') for char in text)
+
+def (morse:str)->str:
+    return ''.join(MORSE_CODE_REVERSE_DICT.get(code, '') for code in morse.split())
+
+# Streamlit app UI
+st.title("Morse Code Converter")
+
+# Options for input types
+input_type = st.radio(
+    "Choose Input Type:",
+    ("Text File", "Morse File", "Text", "Morse")
+)
+
+uploaded_file = None
+user_input = ""
+
+if input_type in ["Text File", "Morse File"]:
+    uploaded_file = st.file_uploader(f"Upload a {input_type.lower()}:", type=["txt"])
+
+if input_type in ["Text", "Morse"]:
+    user_input = st.text_area(f"Enter your {input_type.lower()}:")
+
+# Submit button
+if st.button("Convert"):
+    if input_type == "Text File" and uploaded_file is not None:
+        # Read text file and convert to Morse code
+        file_contents = uploaded_file.read().decode("utf-8")
+        st.write("File Content:")
+        st.text(file_contents)
+        morse_output = text_to_morse(file_contents)
+        st.success("Converted Morse Code:")
+        st.text(morse_output)
+        st.download_button(
+            label="Download Morse Code File",
+            data=morse_output,
+            file_name="morse_code_output.txt",
+            mime="text/plain"
+        )
+
+    elif input_type == "Morse File" and uploaded_file is not None:
+        # Read Morse code file and convert to text
+        file_contents = uploaded_file.read().decode("utf-8")
+        st.write("File Content:")
+        st.text(file_contents)
+        text_output = morse_to_text(file_contents)
+        st.success("Converted Text:")
+        st.text(text_output)
+        st.download_button(
+            label="Download Text File",
+            data=text_output,
+            file_name="text_output.txt",
+            mime="text/plain"
+        )
+
+    elif input_type == "Text" and user_input:
+        # Convert entered text to Morse code
+        morse_output = text_to_morse(user_input)
+        st.success("Converted Morse Code:")
+        st.text(morse_output)
+        st.download_button(
+            label="Download Morse Code File",
+            data=morse_output,
+            file_name="morse_code_output.txt",
+            mime="text/plain"
+        )
+
+    elif input_type == "Morse" and user_input:
+        # Convert entered Morse code to text
+        text_output = morse_to_text(user_input)
+        st.success("Converted Text:")
+        st.text(text_output)
+        st.download_button(
+            label="Download Text File",
+            data=text_output,
+            file_name="text_output.txt",
+            mime="text/plain"
+        )
+    else:
+        st.error("Please provide a valid input!")
+"""
+
+with open("app.py", "w") as file:
+    file.write(app_code)
+
+# Setup ngrok
+from pyngrok import ngrok
+
+# Replace 'YOUR_NGROK_AUTH_TOKEN' with your ngrok authtoken
+!ngrok authtoken 2rAxH0ivVqWPwaR77pMnbsG6z1b_31d7J419wPxuvK5gqzyFJ
+
+# Start Streamlit app
+get_ipython().system_raw("streamlit run app.py &")
+
+# Expose the app via ngrok
+public_url = ngrok.connect(8501)
+print(f"Streamlit app is live at: {public_url}")
